@@ -48,11 +48,14 @@ module Backcall
     end
 
     module InstanceMethods
-      def initialize
-        return true if self.class.callbacks.empty?
-        self.class.callbacks.each do |mod|
-          self.extend(mod)
+      def initialize(*args)
+        
+        unless self.class.callbacks.empty?
+          self.class.callbacks.each do |mod|
+            self.extend(mod)
+          end
         end
+        
       end
     end
 
