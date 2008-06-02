@@ -1,0 +1,6 @@
+CHANGELOG
+lib/backcall.rb
+Manifest
+README
+spec/callback_spec.rb
+spec/spec_helper.rb

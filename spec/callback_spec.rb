@@ -56,8 +56,7 @@ class TestMultipleCallbacks
   def string
     @str ||= String.new
   end
-  before :world, :hello
-  before :world, :hi
+  before :world, :hi, :hello
 end
 describe "Multiple callbacks" do
   before(:each) do
@@ -67,16 +66,16 @@ describe "Multiple callbacks" do
     @klass.world.should == "hi, hello world"
   end
 end
-class TestOutsideClass
-  include Callbacks
-  before :world, :hello, :class => "OutsideClass"
-  def world
-    "world"
+class OutsideClass
+  def self.hello
+    puts "hello"
   end
 end
-class OutsideClass
-  def hello
-    puts "hello"
+class TestOutsideClass
+  include Callbacks
+  before :world, {:hello => "OutsideClass"}
+  def world
+    "world"
   end
 end
 describe "Options" do
@@ -86,5 +85,22 @@ describe "Options" do
   it "should be able to pass external class options to the callback" do
     OutsideClass.should_receive(:hello).and_return "hello"
     @c.world
+  end
+end
+class BlockClass
+  include Callbacks
+  before :world do
+    string << "hello "
+  end
+  def world
+    string << "world"
+  end
+  def string
+    @string ||= ""
+  end
+end
+describe "Block callbacks" do
+  it "should call the block on the callback" do
+    BlockClass.new.world.should == "hello world"
   end
 end

@@ -33,6 +33,14 @@
   
   TestCallbacks.new.world 
   => "hello world, thank you"
+  
+  You can write callbacks currently in the following forms:
+  
+  * before :world, :hello, :hi, :you
+  * before :world do 
+      puts "hello "
+    end
+  * before :world, {:hello => "OutsideClass"}
 
 == INSTALL:
 
