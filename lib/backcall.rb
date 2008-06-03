@@ -1,7 +1,9 @@
 =begin rdoc
   Basic callbacks
 =end
-require "facets"
+# Require core changes
+Dir[File.join(File.dirname(__FILE__), "core/*")].each {|a| require a }
+
 module Backcall
   module Callbacks
     module ClassMethods      
