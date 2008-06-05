@@ -11,23 +11,28 @@ module Backcall
       def define_callback_module(mod)
         callbacks << mod
       end
-      def callbacks
-        @callbacks ||= []
-      end
       def callback(type, m, *args, &block)
-        arr = []
-       
+        arr = []                
         args.each do |arg|
           arr << case arg.class.to_s
           when "Hash"
             arg.collect do |meth, klass|
-              "#{klass}.send :#{meth}"
+              case klass.class.to_s
+              when "String"
+                "#{klass}.send :#{meth}, self"
+              else
+                "
+                # k = #{klass.to_s.split("::")[-1].downcase}
+                # self.class.module_eval %{def #\{k\};@#\{k\} ||= #{klass}.new;end}
+                self.instance_eval %{def #{klass.to_s.downcase};@#{klass.to_s.downcase} ||= #{klass}.new;end}                
+                #{klass.to_s.downcase}.#{meth}(self)"
+              end              
             end
           when "Symbol"
-            "#{arg}"            
+            "self.send :#{arg}, self"
           end
         end
-        
+
         string = ""
         if block_given?
           num = store_proc(block.to_proc)
@@ -35,11 +40,11 @@ module Backcall
             self.class.get_proc(#{num}).bind(self).call
           EOM
         end
-        
+
         string = create_eval_for_mod_with_string_and_type!(m, type) do
           arr.join("\n")
-        end
-        
+        end        
+
         mMode = Module.new {eval string}
 
         define_callback_module(mMode)
@@ -50,48 +55,52 @@ module Backcall
       def after(m, *args, &block)
         callback(:after, m, *args, &block)
       end
-      
+
       def create_eval_for_mod_with_string_and_type!(meth, type=nil, &block)
         str = ""
         case type
         when :before          
           str << <<-EOD
-            def #{meth}
+            def #{meth}(*args)
               #{yield}
               super
             end
           EOD
         when :after
           str << <<-EOD
-            def #{meth}
+            def #{meth}(*args)
               super
               #{yield}
             end
           EOD
         else
           str << <<-EOD
-            def #{meth}
+            def #{meth}(*args)
               #{yield}
             end
           EOD
         end
         str
       end
-      
+
+      def callbacks
+        @callbacks ||= []
+      end
+
     end
 
     module InstanceMethods
       def initialize(*args)
-        
+
         unless self.class.callbacks.empty?
           self.class.callbacks.each do |mod|
             self.extend(mod)
           end
         end
-        
+
       end
     end
-    
+
     module ProcStoreMethods
       def store_proc(proc)
         proc_storage << proc
@@ -111,5 +120,5 @@ module Backcall
       receiver.send :include, InstanceMethods
     end    
   end
-  
+
 end

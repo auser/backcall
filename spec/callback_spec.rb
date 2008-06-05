@@ -7,20 +7,20 @@ class TestCallbacks
   before :world, :hello
   after :world, :thanks
   
-  def hello
+  def hello(caller)
     string << "hello "
   end
   def world
     string << "world"
   end
-  def thanks
+  def thanks(caller)
     string << ", thank you"
   end
   after :pop, :boom
   def pop
     string << "pop"
   end
-  def boom
+  def boom(caller)
     string << " goes boom"
   end    
   def string
@@ -44,10 +44,10 @@ end
 class TestMultipleCallbacks
   include Callbacks
   attr_reader :str
-  def hi
+  def hi(caller)
     string << "hi, "
   end
-  def hello
+  def hello(caller)
     string << "hello "
   end
   def world
@@ -67,7 +67,7 @@ describe "Multiple callbacks" do
   end
 end
 class OutsideClass
-  def self.hello
+  def self.hello(caller)
     puts "hello"
   end
 end
@@ -102,5 +102,92 @@ end
 describe "Block callbacks" do
   it "should call the block on the callback" do
     BlockClass.new.world.should == "hello world"
+  end
+end
+class BlockAndMethodClass
+  include Callbacks
+  before :world, :hi do
+    string << "hello "
+  end
+  def world
+    string << "world"
+  end
+  def hi(caller)
+    string << "hi, "
+  end
+  def string
+    @string ||= ""
+  end
+end
+describe "Block and method callbacks" do
+  it "should call the block on the callback and add the block" do
+    BlockAndMethodClass.new.world.should == "hi, hello world"
+  end
+end
+class ExternalMethodCallClass
+  include Callbacks
+  before :world, :hello
+  after :hello, :peter
+  
+  def world
+    string << "world"
+  end
+  def hello(caller)
+    string << "hello "
+  end
+  def peter(caller)
+    string << "peter "
+  end
+  def string
+    @string ||= ""
+  end
+end
+describe "External method callbacks inside a method" do
+  it "should call the block on the callback and add the " do
+    ExternalMethodCallClass.new.world.should == "hello peter world"
+  end
+end
+class OutsideBindingClass
+  def hello(caller)
+    caller.string << "hello"
+  end
+end
+class BindingClass
+  include Callbacks
+  before :world, :hello => OutsideBindingClass
+  def world
+    string << "#{@hello} world"
+  end
+  def string
+    @string ||= ""
+  end
+end
+describe "Methods" do
+  it "should have access to the local variables of the call" do
+    BindingClass.new.world.should == "hello world"
+  end
+end
+class EvilOutsideClass
+  attr_reader :name
+  def get_name(caller)
+    @name = caller.hello
+  end
+  def show_name(caller)
+    @name
+  end
+end
+class BindingClass
+  include Callbacks
+  before :print, :get_name => EvilOutsideClass
+  def print
+    "hello"
+  end
+  def hello
+    "franke"
+  end
+end
+describe "Variables on the plugin callbacker class" do
+  it "should be able to get to the same data twice" do
+    BindingClass.new.print
   end
 end
