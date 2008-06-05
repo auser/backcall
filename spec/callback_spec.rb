@@ -73,7 +73,7 @@ class OutsideClass
 end
 class TestOutsideClass
   include Callbacks
-  before :world, {:hello => "OutsideClass"}
+  before :world, {:hello => OutsideClass}
   def world
     "world"
   end
@@ -154,7 +154,7 @@ class OutsideBindingClass
 end
 class BindingClass
   include Callbacks
-  before :world, :hello => OutsideBindingClass
+  before :world, :hello => "OutsideBindingClass"
   def world
     string << "#{@hello} world"
   end
@@ -178,7 +178,7 @@ class EvilOutsideClass
 end
 class BindingClass
   include Callbacks
-  before :print, :get_name => EvilOutsideClass
+  before :print, :get_name => "EvilOutsideClass"
   def print
     "hello"
   end

@@ -20,13 +20,13 @@
   class TestCallbacks  
     before :world, :hello
     after :world, :thanks
-    def hello
+    def hello(caller)
       string << "hello "
     end
     def world
       string << "world"
     end
-    def thanks
+    def thanks(caller)
       string << ", thank you"
     end
   end
@@ -41,6 +41,11 @@
       puts "hello "
     end
   * before :world, {:hello => "OutsideClass"}
+  * before :world, {:hello => OutsideClass}
+  
+  Note on the last two:
+  If you call the last style with a string, it expects the OutsideClass 
+  If you call the last one, your class with create a method that calls new on the class that you send to it, It will keep 
 
 == INSTALL:
 

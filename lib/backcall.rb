@@ -19,13 +19,12 @@ module Backcall
             arg.collect do |meth, klass|
               case klass.class.to_s
               when "String"
-                "#{klass}.send :#{meth}, self"
-              else
                 "
-                # k = #{klass.to_s.split("::")[-1].downcase}
-                # self.class.module_eval %{def #\{k\};@#\{k\} ||= #{klass}.new;end}
                 self.instance_eval %{def #{klass.to_s.downcase};@#{klass.to_s.downcase} ||= #{klass}.new;end}                
-                #{klass.to_s.downcase}.#{meth}(self)"
+                #{klass.to_s.downcase}.#{meth}(self)
+                "                
+              else
+                "#{klass}.send :#{meth}, self"
               end              
             end
           when "Symbol"
