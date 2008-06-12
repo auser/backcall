@@ -7,5 +7,3 @@ $:.unshift(File.join(File.dirname(__FILE__), %w(.. lib)))
     STDERR.puts "== Cannot run test without #{library}"
   end
 end
-
-include Backcall

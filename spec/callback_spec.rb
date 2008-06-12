@@ -190,4 +190,11 @@ describe "Variables on the plugin callbacker class" do
   it "should call the methods from the class itself on a singeton method" do
     BindingClass.new.methods.include?("eviloutsideclass").should == true
   end
+  it "should call get_name on EvilOutsideClass" do
+    @bc = BindingClass.new
+    @eoc = EvilOutsideClass.new
+    @bc.should_receive("eviloutsideclass").and_return(@eoc)
+    @eoc.should_receive("get_name").and_return("bob")
+    @bc.print
+  end
 end
