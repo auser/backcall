@@ -1,6 +1,8 @@
 CHANGELOG
 lib/backcall.rb
+lib/core/proc.rb
 Manifest
+Rakefile
 README
 spec/callback_spec.rb
 spec/spec_helper.rb
