@@ -7,9 +7,12 @@ Dir[File.join(File.dirname(__FILE__), "core/*")].each {|a| require a }
 module Backcall
   module Callbacks
     module ClassMethods      
-      attr_reader :callbacks
+      attr_reader :callbacks, :classes
       def define_callback_module(mod)
         callbacks << mod
+      end
+      def define_callback_class(cla)
+        classes << cla
       end
       def callback(type, m, *args, &block)
         arr = []                
@@ -19,10 +22,8 @@ module Backcall
             arg.collect do |meth, klass|
               case klass.class.to_s
               when "String"
-                "
-                self.instance_eval %{def #{klass.to_s.downcase};@#{klass.to_s.downcase} ||= #{klass}.new;end}                
-                #{klass.to_s.downcase}.#{meth}(self)
-                "                
+                define_callback_class(klass)
+                "#{klass.to_s.downcase}.#{meth}(self)"
               else
                 "#{klass}.send :#{meth}, self"
               end              
@@ -85,7 +86,9 @@ module Backcall
       def callbacks
         @callbacks ||= []
       end
-
+      def classes
+        @classes ||= []
+      end
     end
 
     module InstanceMethods
@@ -94,6 +97,12 @@ module Backcall
         unless self.class.callbacks.empty?
           self.class.callbacks.each do |mod|
             self.extend(mod)
+          end
+        end
+        unless self.class.classes.empty? 
+          self.class.classes.each do |klass|
+            m = %{def #{klass.to_s.downcase};@#{klass.to_s.downcase} ||= #{klass}.new;end}
+            self.class.class_eval m
           end
         end
 

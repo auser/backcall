@@ -178,7 +178,7 @@ class EvilOutsideClass
 end
 class BindingClass
   include Callbacks
-  before :print, :get_name => "EvilOutsideClass"
+  before :print, {:get_name => "EvilOutsideClass"}
   def print
     "hello"
   end
@@ -187,7 +187,7 @@ class BindingClass
   end
 end
 describe "Variables on the plugin callbacker class" do
-  it "should be able to get to the same data twice" do
-    BindingClass.new.print
+  it "should call the methods from the class itself on a singeton method" do
+    BindingClass.new.methods.include?("eviloutsideclass").should == true
   end
 end
