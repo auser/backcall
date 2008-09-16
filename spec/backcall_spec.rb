@@ -1,5 +1,12 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
+class DummyClass  
+end
+describe "Class extension" do
+  it "should respond to before on the class level when it's included" do
+    DummyClass.respond_to?(:before).should == true
+  end
+end
 class TestCallbacks
   include Callbacks
   attr_reader :str

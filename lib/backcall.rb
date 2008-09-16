@@ -132,3 +132,7 @@ module Callbacks
     receiver.send :include, InstanceMethods
   end
 end
+
+class Class
+  include Callbacks::ClassMethods
+end
